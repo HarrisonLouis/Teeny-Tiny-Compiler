@@ -1,9 +1,11 @@
 from lex import *
 from parse import *
 
+VERSION = "1.0"
+
 
 def main():
-    print("Teeny Tiny Compiler")
+    print("Teeny Tiny Compiler v" + VERSION + "\n")
 
     if len(sys.argv) != 2:
         sys.exit("Error: Compiler needs source file as argument.")
@@ -14,7 +16,7 @@ def main():
     parser = Parser(lexer)
 
     parser.program()
-    print("Parsing completed.")
+    print("\nParsing completed.")
 
 
 main()
