@@ -14,14 +14,16 @@ def main():
     with open(sys.argv[1], "r") as inputFile:
         source = inputFile.read()
 
+    print("Initializing components.")
     lexer = Lexer(source)
     emitter = Emitter("out.c")
     parser = Parser(lexer, emitter)
 
+    print("Parsing " + str(inputFile.name) + ".")
     parser.program()
+    print("Writing to " + emitter.fullPath + ".")
     emitter.writeFile()
 
-    print("")
     print("Compiling completed.")
 
 
