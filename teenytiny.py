@@ -1,5 +1,7 @@
 from lex import *
 from parse import *
+from emit import *
+import sys
 
 VERSION = "1.0"
 
@@ -13,10 +15,14 @@ def main():
         source = inputFile.read()
 
     lexer = Lexer(source)
-    parser = Parser(lexer)
+    emitter = Emitter("out.c")
+    parser = Parser(lexer, emitter)
 
     parser.program()
-    print("\nParsing completed.")
+    emitter.writeFile()
+
+    print("")
+    print("Compiling completed.")
 
 
 main()

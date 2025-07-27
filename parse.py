@@ -22,8 +22,9 @@ from lex import *
 
 
 class Parser:
-    def __init__(self, lexer):
+    def __init__(self, lexer, emitter):
         self.lexer = lexer
+        self.emitter = emitter
 
         self.symbols = set()
         self.labelsDeclared = set()
@@ -54,13 +55,17 @@ class Parser:
 
     # program ::= {statement}
     def program(self):
-        print("PROGRAM")
+        self.emitter.headerLine("#include <stdio.h>")
+        self.emitter.headerLine("int main(void){")
 
         while self.checkToken(TokenType.NEWLINE):
             self.nextToken()
 
         while not self.checkToken(TokenType.EOF):
             self.statement()
+
+        self.emitter.emitLine("return 0;")
+        self.emitter.emitLine("}")
 
         for label in self.labelsGotoed:
             if label not in self.labelsDeclared:
@@ -69,13 +74,15 @@ class Parser:
     def statement(self):
         # "PRINT" (expression | string) nl
         if self.checkToken(TokenType.PRINT):
-            print("STATEMENT-PRINT")
             self.nextToken()
 
             if self.checkToken(TokenType.STRING):
+                self.emitter.emitLine('printf("' + self.curToken.text + '\\n");')
                 self.nextToken()
             else:
+                self.emitter.emit('printf("%' + '.2f\\n", (float)(')
                 self.expression()
+                self.emitter.emitLine("));")
         # "IF" comparison "THEN" {statement} "ENDIF"
         elif self.checkToken(TokenType.IF):
             print("STATEMENT-IF")
