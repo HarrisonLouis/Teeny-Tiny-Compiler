@@ -11,12 +11,19 @@ def main():
 
     if len(sys.argv) != 2:
         sys.exit("Error: Compiler needs source file as argument.")
-    with open(sys.argv[1], "r") as inputFile:
+
+    filepath = sys.argv[1]
+    filename = filepath.split(".")[0]
+    outfile = filename + ".c"
+
+    with open(filepath, "r") as inputFile:
         source = inputFile.read()
+
+    print("Writing code to " + outfile)
 
     print("Initializing components.")
     lexer = Lexer(source)
-    emitter = Emitter("out.c")
+    emitter = Emitter(outfile)
     parser = Parser(lexer, emitter)
 
     print("Parsing " + str(inputFile.name) + ".")
