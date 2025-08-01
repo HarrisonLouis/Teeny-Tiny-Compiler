@@ -15,4 +15,4 @@ class Emitter:
 
     def writeFile(self):
         with open(self.fullPath, "w") as outputFile:
-            outputFile.write(self.header + "\n" + self.code)
+            outputFile.write(self.header + self.code)
