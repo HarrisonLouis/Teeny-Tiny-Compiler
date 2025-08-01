@@ -9,6 +9,7 @@ statement ::= "PRINT" (expression | string) nl
     | "GOTO" ident nl
     | "LET" ident "=" expression nl
     | "INPUT" ident nl
+boolean_expr ::= comparison { ("AND" | "OR") comparison }
 comparison ::= expression (("==" | "!=" | ">" | ">=" | "<" | "<=") expression)+
 expression ::= term {( "-" | "+" ) term}
 term ::= unary {( "/" | "*" ) unary}
@@ -19,6 +20,7 @@ nl ::= '\n'+
 
 import sys
 from lex import *
+import traceback
 
 
 class Parser:
@@ -51,6 +53,9 @@ class Parser:
         self.peekToken = self.lexer.getToken()
 
     def abort(self, message):
+        print(traceback.print_stack())
+        print()
+        print(self.emitter.code)
         sys.exit("Error! " + message)
 
     # program ::= {statement}
@@ -87,11 +92,11 @@ class Parser:
         elif self.checkToken(TokenType.IF):
             self.nextToken()
             self.emitter.emit("if(")
-            self.comparison()
+            self.boolean_expr()
 
             self.match(TokenType.THEN)
             self.nl()
-            self.emitter.emitline("){")
+            self.emitter.emitLine("){")
 
             while not self.checkToken(TokenType.ENDIF):
                 self.statement()
@@ -102,7 +107,7 @@ class Parser:
         elif self.checkToken(TokenType.WHILE):
             self.nextToken()
             self.emitter.emit("while(")
-            self.comparison()
+            self.boolean_expr()
 
             self.match(TokenType.REPEAT)
             self.nl()
@@ -121,7 +126,7 @@ class Parser:
                 self.abort("Label already exists: " + self.curToken.text)
             self.labelsDeclared.add(self.curToken.text)
 
-            self.emitteremitLine(self.curToken.text + ":")
+            self.emitter.emitLine(self.curToken.text + ":")
             self.match(TokenType.IDENT)
         # "GOTO" ident
         elif self.checkToken(TokenType.GOTO):
@@ -177,11 +182,40 @@ class Parser:
         while self.checkToken(TokenType.NEWLINE):
             self.nextToken()
 
+    # boolean_expr ::= comparison { ("AND" | "OR") comparison }
+
+    def boolean_expr(self):
+        self.single_comparison()
+
+        # using while instead of if to eventually account for NOT
+        while self.isBooleanOperator():
+            self.booleanString()
+            self.nextToken()
+            self.comparison()
+
+    def booleanString(self):
+        if self.checkToken(TokenType.AND):
+            self.emitter.emit(" && ")
+        elif self.checkToken(TokenType.OR):
+            self.emitter.emit(" || ")
+        else:
+            self.abort("Expected AND or OR but received: " + self.curToken.text)
+
+    def isBooleanOperator(self):
+        return (
+            self.checkToken(TokenType.AND)
+            or self.checkToken(TokenType.OR)
+            or self.checkToken(TokenType.NOT)
+        )
+
     # comparison ::= expression (("==" | "!=" | ">" | ">=" | "<" | "<=") expression)+
     def comparison(self):
         self.expression()
 
         if self.isComparisonOperator():
+            print(
+                "Emitting " + self.curToken.text + " of type " + str(self.curToken.kind)
+            )
             self.emitter.emit(self.curToken.text)
             self.nextToken()
             self.expression()
@@ -189,10 +223,10 @@ class Parser:
         else:
             self.abort("Expected comparison operator at: " + self.curToken.text)
 
-        while self.isComparisonOperator():
-            self.emitter.emit(self.curToken.text)
-            self.nextToken()
-            self.expression()
+        # while self.isComparisonOperator():
+        #     self.emitter.emit(self.curToken.text)
+        #     self.nextToken()
+        #     self.expression()
 
     def isComparisonOperator(self):
         return (
@@ -204,8 +238,18 @@ class Parser:
             or self.checkToken(TokenType.NOTEQ)
         )
 
+    def single_comparison(self):
+        self.expression()
+
+        if self.isComparisonOperator():
+            self.emitter.emit(self.curToken.text)
+            self.nextToken()
+            self.expression()
+
     # expression ::= term {( "-" | "+" ) term}
     def expression(self):
+        # print("entering expression()")
+        # print(self.curToken.kind, self.curToken.text)
         self.term()
         while self.checkToken(TokenType.PLUS) or self.checkToken(TokenType.MINUS):
             self.emitter.emit(self.curToken.text)
@@ -239,5 +283,11 @@ class Parser:
                 )
             self.emitter.emit(self.curToken.text)
             self.nextToken()
+        elif self.checkToken(TokenType.LEFTPAR):
+            self.emitter.emit(self.curToken.text)
+            self.nextToken()
+            self.expression()
+            self.match(TokenType.RIGHTPAR)
+            self.emitter.emit(")")
         else:
-            self.abort("Unexpected token at " + self.curToken.next)
+            self.abort("Unexpected token at " + self.curToken.text)

@@ -46,6 +46,10 @@ class Lexer:
             token = Token(self.curChar, TokenType.ASTERISK)
         elif self.curChar == "/":
             token = Token(self.curChar, TokenType.SLASH)
+        elif self.curChar == "(":
+            token = Token(self.curChar, TokenType.LEFTPAR)
+        elif self.curChar == ")":
+            token = Token(self.curChar, TokenType.RIGHTPAR)
         elif self.curChar == "=":
             if self.peek() == "=":
                 lastChar = self.curChar
@@ -160,6 +164,10 @@ class TokenType(enum.Enum):
     WHILE = 109
     REPEAT = 110
     ENDWHILE = 111
+    # Boolean Operators
+    AND = 112
+    OR = 113
+    NOT = 114
     # Operators.
     EQ = 201
     PLUS = 202
@@ -172,3 +180,5 @@ class TokenType(enum.Enum):
     LTEQ = 209
     GT = 210
     GTEQ = 211
+    LEFTPAR = 212
+    RIGHTPAR = 213
