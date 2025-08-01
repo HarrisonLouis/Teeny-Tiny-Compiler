@@ -19,8 +19,6 @@ def main():
     with open(filepath, "r") as inputFile:
         source = inputFile.read()
 
-    print("Writing code to " + outfile)
-
     print("Initializing components.")
     lexer = Lexer(source)
     emitter = Emitter(outfile)
