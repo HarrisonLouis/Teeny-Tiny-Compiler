@@ -9,6 +9,8 @@ statement ::= "PRINT" (expression | string) nl
     | "GOTO" ident nl
     | "LET" ident "=" expression nl
     | "INPUT" ident nl
+    | "REM" string nl
+    | "FOR" ident "=" int "TO" int {statement} NEXT nl
 boolean_expr ::= comparison { ("AND" | "OR") comparison }
 comparison ::= expression (("==" | "!=" | ">" | ">=" | "<" | "<=") expression)+
 expression ::= term {( "-" | "+" ) term}
@@ -164,15 +166,63 @@ class Parser:
             self.emitter.emitLine('*s");')
             self.emitter.emitLine("}")
             self.match(TokenType.IDENT)
+        # "REM" string nl
         elif self.checkToken(TokenType.REM):
             text = "// "
             while not self.curToken.kind == TokenType.NEWLINE:
                 if self.curToken.text != "REM":
                     text += self.curToken.text + " "
                 self.nextToken()
-            print(text)
             self.emitter.emitLine(text)
+        # "FOR" ident "=" int "TO" int nl {statement} nl NEXT nl
+        elif self.checkToken(TokenType.FOR):
+            forLoop = "for(int "
+            self.nextToken()
 
+            forLoop += self.curToken.text
+            counterVar = self.curToken.text
+            self.symbols.add(counterVar)
+            self.match(TokenType.IDENT)
+
+            forLoop += self.curToken.text
+            self.match(TokenType.EQ)
+
+            forLoop += self.curToken.text + ";"
+            firstNumber = self.curToken.text
+            self.match(TokenType.NUMBER)
+
+            self.match(TokenType.TO)
+
+            secondNumber = self.curToken.text
+            self.match(TokenType.NUMBER)
+
+            if firstNumber > secondNumber:
+                sign = ">"
+            else:
+                sign = "<"
+
+            forLoop += counterVar + sign + secondNumber + ";"
+
+            if sign == ">":
+                forLoop += counterVar + "--"
+            elif sign == "<":
+                forLoop += counterVar + "++"
+            else:
+                self.abort("Sign is messed up!")
+
+            self.emitter.emitLine(forLoop + "){")
+
+            print(self.curToken.kind)
+            print(self.peekToken.kind)
+
+            while self.curToken.kind == TokenType.NEWLINE:
+                self.nextToken()
+
+            self.statement()
+
+            self.match(TokenType.NEXT)
+            self.emitter.emitLine("}")
+            self.symbols.remove(counterVar)
         else:
             self.abort(
                 "Invalid statement at "

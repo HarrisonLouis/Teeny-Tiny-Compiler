@@ -165,10 +165,12 @@ class TokenType(enum.Enum):
     REPEAT = 110
     ENDWHILE = 111
     REM = 112
-    # Boolean Operators
     AND = 113
     OR = 114
     NOT = 115
+    FOR = 116
+    TO = 117
+    NEXT = 118
     # Operators.
     EQ = 201
     PLUS = 202
