@@ -166,9 +166,9 @@ class TokenType(enum.Enum):
     ENDWHILE = 111
     REM = 112
     # Boolean Operators
-    AND = 112
-    OR = 113
-    NOT = 114
+    AND = 113
+    OR = 114
+    NOT = 115
     # Operators.
     EQ = 201
     PLUS = 202

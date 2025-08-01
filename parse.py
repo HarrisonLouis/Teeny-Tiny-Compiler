@@ -194,7 +194,7 @@ class Parser:
     # boolean_expr ::= comparison { ("AND" | "OR") comparison }
 
     def boolean_expr(self):
-        self.single_comparison()
+        self.comparison()
 
         # using while instead of if to eventually account for NOT
         while self.isBooleanOperator():
