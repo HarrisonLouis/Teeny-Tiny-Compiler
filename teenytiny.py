@@ -3,7 +3,7 @@ from parse import *
 from emit import *
 import sys
 
-VERSION = "1.1a"
+VERSION = "1.1d"
 
 
 def main():
