@@ -196,7 +196,7 @@ class Parser:
             secondNumber = self.curToken.text
             self.match(TokenType.NUMBER)
 
-            if firstNumber > secondNumber:
+            if int(firstNumber) > int(secondNumber):
                 sign = ">"
             else:
                 sign = "<"
