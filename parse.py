@@ -164,6 +164,15 @@ class Parser:
             self.emitter.emitLine('*s");')
             self.emitter.emitLine("}")
             self.match(TokenType.IDENT)
+        elif self.checkToken(TokenType.REM):
+            text = "// "
+            while not self.curToken.kind == TokenType.NEWLINE:
+                if self.curToken.text != "REM":
+                    text += self.curToken.text + " "
+                self.nextToken()
+            print(text)
+            self.emitter.emitLine(text)
+
         else:
             self.abort(
                 "Invalid statement at "
@@ -213,9 +222,7 @@ class Parser:
         self.expression()
 
         if self.isComparisonOperator():
-            print(
-                "Emitting " + self.curToken.text + " of type " + str(self.curToken.kind)
-            )
+            # print("Emitting " + self.curToken.text + " of type " + str(self.curToken.kind))
             self.emitter.emit(self.curToken.text)
             self.nextToken()
             self.expression()

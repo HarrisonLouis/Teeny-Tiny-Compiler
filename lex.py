@@ -164,6 +164,7 @@ class TokenType(enum.Enum):
     WHILE = 109
     REPEAT = 110
     ENDWHILE = 111
+    REM = 112
     # Boolean Operators
     AND = 112
     OR = 113
